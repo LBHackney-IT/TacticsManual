@@ -1,0 +1,257 @@
+---
+layout: default
+---
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>
+       <script type="text/javascript">
+	/* jQuery Star Rating Plugin
+ * 
+ * @Author
+ * Copyright Nov 02 2010, Irfan Durmus - http://irfandurmus.com/
+ *
+ * @Version
+ * 0.3b
+ *
+ * @License
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ *
+ * Visit the plugin page for more information.
+ * http://irfandurmus.com/projects/jquery-star-rating-plugin/
+ *
+ */
+(function($){
+    $.fn.rating = function(callback){
+        
+        callback = callback || function(){};
+        // each for all item
+        this.each(function(i, v){
+            
+            $(v).data('rating', {callback:callback})
+                .bind('init.rating', $.fn.rating.init)
+                .bind('set.rating', $.fn.rating.set)
+                .bind('hover.rating', $.fn.rating.hover)
+                .trigger('init.rating');
+        });
+    };
+   
+    
+    $.extend($.fn.rating, {
+        init: function(e){
+            var el = $(this),
+                list = '',
+                isChecked = null,
+                childs = el.children(),
+                i = 0,
+                l = childs.length;
+            
+            for (; i < l; i++) {
+                list = list + '<a class="star" title="' + $(childs[i]).val() + '" />';
+                if ($(childs[i]).is(':checked')) {
+                    isChecked = $(childs[i]).val();
+                };
+            };
+            
+            childs.hide();
+            
+            el
+                .append('<div class="stars">' + list + '</div>')
+                .trigger('set.rating', isChecked);
+            
+            $('a', el).bind('click', $.fn.rating.click);            
+            el.trigger('hover.rating');
+        },
+        set: function(e, val) {
+            var el = $(this),
+                item = $('a', el),
+                input = undefined;
+            
+            if (val) {
+                item.removeClass('fullStar');
+                
+                input = item.filter(function(i){
+                    if ($(this).attr('title') == val)
+                        return $(this);
+                    else
+                        return false;
+                });
+                
+                input
+                    .addClass('fullStar')
+                    .prevAll()
+                    .addClass('fullStar');
+            }
+            
+            return;
+        },
+        hover: function(e){
+            var el = $(this),
+                stars = $('a', el);
+            
+            stars.bind('mouseenter', function(e){
+                // add tmp class when mouse enter
+                $(this)
+                    .addClass('tmp_fs')
+                    .prevAll()
+                    .addClass('tmp_fs');
+                
+                $(this).nextAll()
+                    .addClass('tmp_es');
+            });
+            
+            stars.bind('mouseleave', function(e){
+                // remove all tmp class when mouse leave
+                $(this)
+                    .removeClass('tmp_fs')
+                    .prevAll()
+                    .removeClass('tmp_fs');
+                
+                $(this).nextAll()
+                    .removeClass('tmp_es');
+            });
+        },
+        click: function(e){
+            e.preventDefault();
+            var el = $(e.target),
+                container = el.parent().parent(),
+                inputs = container.children('input'),
+                rate = el.attr('title');
+            //alert(rate);
+           
+            createfile(rate);
+            matchInput = inputs.filter(function(i){
+                if ($(this).val() == rate)
+                    return true;
+                else
+                    return false;
+            });
+            
+                Starcontainer
+                .trigger('set.rating', matchInput.val())
+                .data('rating').callback(rate, e);
+        }
+    });
+    
+   
+/*    function createfile(rate)
+    {
+        var xmlDoc = new XMLHttpRequest();
+        var fso = new ActiveXObject("Scripting.FileSystemObject");
+        var FILENAME='C:/Users/Sauvala/Desktop/GitHub5StarRating/Ratinglog.xml';
+        var file;
+        var d = new Date("YYYY/MM/DD");
+        var node1= d;
+       
+        var node2= rate;
+    
+       
+        if(fso.fileExists(FILENAME))
+        {
+            xmlDoc.open(FILENAME);
+            var lng;
+            lng=xmlDoc.getElementsByTagName("Details");
+            var xmlread= fso.OpenTextFile(FILENAME,1,true,0);
+            var x=xmlread.readAll();
+            var replace=x.replace('</webrating>','');
+            var sno=lng.length + 1;
+            file=fso.OpenTextFile(FILENAME,2,true);
+            file.writeLine(replace);
+            file.WriteLine('<Details category="'+sno+'">');
+            file.WriteLine('<SNo>'+sno+'</SNo>');
+            file.WriteLine('<Date>'+node1+'</Date>');
+            file.WriteLine('<Rating>'+node2+'</Rating>');
+           
+            file.WriteLine('</Details>');
+            file.WriteLine('</webrating>');
+            alert('another file updated');
+        }
+        else
+        {
+            file= fso.CreateTextFile(FILENAME, true);
+            file.WriteLine('<?xml version="1.0" encoding="utf-8" ?>');
+            file.WriteLine('<?xml-stylesheet type="text/xsl" href="cdcatalog.xsl"?>');
+            file.WriteLine('<webrating>');
+            file.WriteLine('<Details category="1">');
+            file.WriteLine('<SNo>'+1+'</SNo>');
+            file.WriteLine('<Date>'+node1+'</Date>');
+            file.WriteLine('<Rating>'+node2+'</Rating>');
+           
+         
+            file.WriteLine('</Details>');
+            file.WriteLine('</webrating>');
+            alert('file updated');
+        }
+       
+        file.close();
+    }
+*/
+})(jQuery);
+	</script>
+    <style>
+	.star{
+    background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAABQCAYAAAAZQFV3AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAABOFJREFUeNrsmEFoHFUYx9/MdHfTJRKzUhBaFiL1YghZCFQUIV6UQJuLWCgr8eKpIoiFSqsHQYrmYj14KHqxKAl6MbA5eCgKRVAMBhpCwIJQCETRQzTsNtnO7s74+17fbGc3M7OzZhUsHfjzdvd97/++973vff99Y/m+rwb5WL0Idz60h2nckTc8Nw2hncLmAnhtIB7i3VGan8VD8Dhebh+U8FOaX8Bh4EB48R8TQlai+QnkgMTxD/AYpFt9EULk0EyBD8Dn4BPT9TZ4CrwD6Wos4V+XrUdpXzQk4tUEkAFXwNUu+1fAWWO7anADLDLJTkCYpf0K3DQe3Ui5oUI6B8ShlyBstZfMMiXoX4MV8GZKQgnJcXA6nKPtGJoE/gZ8Cy6mIJPwnIJsL3ZTIB2h+U6WANZjyE6Aj8Cz3WT7TooJ7HUwneDdc+BaFFnc0SuCzQTCTWOT+iwfN6cjWJ6clo9NzOS5Bcb6IZTZj5pU+syEYNV8XzA2Y6lOCptyhGbDeDFPnJa6TlGZ5rxJ/nxkSRPCACR5EUyHf4sCNjOgENVn/ecVe+CEy8vLWgJmZ2fd1IRra2vxSbe5eYlmu1gsXo6zmZycTKcpkEn6vC61kM+FQYiUeDdvauP5Ay0ZjyIlgKVv9bVkiBwQVJRX2YwWkKLxrhxB+qYSPaxUKrESANHVrh2PlQAzqSbskAA6UkkA5B0SICvRSzb5ddrMWu4jh8umSLwckLVjSKClWJ6SwsrM76fwLpCAM4x1I9OGjhrN8+AkAyYSyGTDnhEHjCPxeYhBagmIIvtXJOBQkgSY5Z01/76umAy4lbpiG5IqzQuG6Alz9LLmf+IP5hh+AfmxnoSQdUgAg5a6JuuQgMiSFi7fJHkR9JQAbGbA/SoBi4uLWgLK5XIqCdBpkyQBZne3sTm4BGxsbLQlgM+DkYBsNjucyWQKaSXATvCuZFnWHIQqlxMVUOeMx/0RMsgBWgIgcyBVgqwwIwH0JUvAwsJChwQwuOQ4jrJtO/CsfQBc11We56lWqyXfOySALNgJdlmuWzNSB/P5vBKyyJnxMjxBs9mc2tvbEye+DN1l7uYhuaZvAXg1LaQyOOkRL3d3d8XLishHOEd1DMfHx7UEYLjCrCop2aXP2Mht4QxjoyWADi0BxGddZm80GjpWYSL5TfpkYnHAOBK/yxhoCZAl1et1PbharWrUajX9m/SJBESRJUlAr6fvW0CvZyyxOIQPN4kbnv1mlwQERGPhMbHli/Q5Yv5lSdDnSYelrlLWIQGRJS1cvjk1RdBTArCZAferBPT7IkjvcuP7t3pKADaxEpB5+r10FXv3x3kKqqUlgM+DkQB76OFhKzdycAnAo5KynTlraFTZQ4/gqH3ursd9EjLIAVoC7KGCAxFWNqSjWgLoS5aAfS+C7EzJcrLKOjSkrNwoFu0ToPz6n8pv3dFQXjPyRdA9CbDsk/ZDx5SQxWiAsg4X7vE361NedQsn/P0SELwIgmzaHiZMtpMcKK+pWlUuVF6j0v0iSMcw/+QFLQF+y13xbv/GpF4CWUt5tV+FTEsAY6MlgA4tASxlnaUo362yLGLlh2Lo1iCjj4nFAeNI/H9sDHbYxesEfcK//XvSoq9Fkf0/JCDqDWfV3I+TJGCLne19CzAvgtoS8OBF0APC6OdvAQYAj2xzC/IfXBsAAAAASUVORK5CYII=');
+    background-position:left -2px;
+    display:block;
+    width:20px;
+    height:16px;
+    line-height:16px;
+    float:left;
+    cursor: pointer;
+    zoom:1;
+}
+.fullStar{
+    background-position:left -59px;
+}
+.stars{
+    overflow: hidden;
+}
+.tmp_es{
+    background-position:left -21px;
+}
+.tmp_fs{
+    background-position:left -40px;
+}
+	</style>
+    
+  
+			
+			<script type="text/javascript">
+			
+			$(function(){
+			$('.Starcontainer').rating(function(vote, event){
+var xml;
+    
+    return {getXml : function()
+    {
+        if (xml) return xml;
+        // else show some error that it isn't loaded yet;
+    }};
+    });
+});
+			</script>
+<article class="post">
+  <h1>{{ page.title }}</h1>
+
+  <div class="entry">
+    {{ content }}
+  </div>
+
+  <div class="date">
+    Written on {{ page.date | date: "%B %e, %Y" }}
+  </div>
+
+  {% include disqus.html %}
+  <br /> <br />
+    <div class="date">
+	    <strong>Rate It:</strong>
+	    </div>
+ <!--Star Rating-->
+   <div class="Starcontainer">
+	
+        <input type="radio" name="example" class="rating" value="1" />
+        <input type="radio" name="example" class="rating" value="2" />
+        <input type="radio" name="example" class="rating" value="3" />
+        <input type="radio" name="example" class="rating" value="4" />
+        <input type="radio" name="example" class="rating" value="5" />
+		
+    </div>
+	
+</article>
