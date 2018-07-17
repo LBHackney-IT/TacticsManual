@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Tactic 1 How to align the team
+title: Tactic 1 How to align the team.
 ---
 
 
